@@ -81,7 +81,7 @@ export function setupTouchScroll(config: TouchScrollConfig): () => void {
       const deltaY = Math.abs(touch.clientY - initialY);
 
       // Determine swipe direction on first significant movement
-      if (isHorizontal === null && (deltaX > 10 || deltaY > 10)) {
+      if (isHorizontal === null && (deltaX > 15 || deltaY > 15)) {
         touchState.isHorizontal = deltaX > deltaY;
       }
 
@@ -92,34 +92,20 @@ export function setupTouchScroll(config: TouchScrollConfig): () => void {
       e.stopPropagation();
 
       const moveDeltaY = touch.clientY - lastY;
-      if (Math.abs(moveDeltaY) < 10) return;
+      if (Math.abs(moveDeltaY) < 25) return;
 
       const buffer = term.buffer.active;
 
-      if (buffer.type === "alternate") {
-        // In alternate buffer mode (e.g., vim, less, claude, codex):
-        // Send mouse wheel events to the application/tmux (which must have mouse mode on).
-        // Natural scrolling: swipe down (moveDeltaY > 0) = scroll up = see older = button 64
-        //                    swipe up   (moveDeltaY < 0) = scroll down = see newer = button 65
-        // Send multiple events proportional to scroll distance for smoother response.
-        if (wsRef.current?.readyState === WebSocket.OPEN) {
-          const wheelEvent =
-            moveDeltaY > 0 ? "\x1b[<64;1;1M" : "\x1b[<65;1;1M";
-          const eventCount = Math.max(1, Math.round(Math.abs(moveDeltaY) / 20));
-          const payload = wheelEvent.repeat(eventCount);
-          wsRef.current.send(JSON.stringify({ type: "input", data: payload }));
-        }
-        // Also attempt xterm.js viewport scroll as fallback
-        // (works if xterm has scrollback in alternate mode, e.g. some tmux configs)
-        const scrollAmount = Math.round(-moveDeltaY / 20);
-        if (scrollAmount !== 0) {
-          term.scrollLines(scrollAmount);
-        }
+      if (
+        buffer.type === "alternate" &&
+        wsRef.current?.readyState === WebSocket.OPEN
+      ) {
+        // Send mouse wheel events for alternate buffer (e.g., less, vim)
+        const wheelEvent = moveDeltaY < 0 ? "\x1b[<65;1;1M" : "\x1b[<64;1;1M";
+        wsRef.current.send(JSON.stringify({ type: "input", data: wheelEvent }));
         touchState.lastY = touch.clientY;
-      } else {
-        // Normal buffer: use xterm.js viewport scroll.
-        // Natural scrolling: swipe down (moveDeltaY > 0) = see older content = scroll up (negative).
-        const scrollAmount = Math.round(-moveDeltaY / 15);
+      } else if (buffer.type !== "alternate") {
+        const scrollAmount = Math.round(moveDeltaY / 15);
         if (scrollAmount !== 0) {
           term.scrollLines(scrollAmount);
           touchState.lastY = touch.clientY;

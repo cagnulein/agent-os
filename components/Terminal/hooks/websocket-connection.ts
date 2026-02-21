@@ -135,9 +135,8 @@ export function createWebSocketConnection(
           const isNowAtTop = scrollYAfter <= 0;
 
           // If we jumped to top but weren't at top before, and weren't at bottom
-          // (at bottom means we want to follow output), restore position.
-          // Use threshold of 1 instead of 5 to protect small manual scrolls too.
-          if (isNowAtTop && !wasAtTop && !wasAtBottom && scrollYBefore > 0) {
+          // (at bottom means we want to follow output), restore position
+          if (isNowAtTop && !wasAtTop && !wasAtBottom && scrollYBefore > 5) {
             term.scrollToLine(scrollYBefore);
           }
         });
