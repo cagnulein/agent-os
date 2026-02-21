@@ -31,6 +31,9 @@ const SPECIAL_KEYS = {
   CTRL_L: "\x0c",
   PAGE_UP: "\x1b[5~",
   PAGE_DOWN: "\x1b[6~",
+  // Tmux copy-mode + scroll: \x02[ enters copy-mode, then the page key scrolls
+  TMUX_SCROLL_UP: "\x02[\x1b[5~",
+  TMUX_SCROLL_DOWN: "\x02[\x1b[6~",
 } as const;
 
 interface TerminalToolbarProps {
@@ -526,13 +529,13 @@ export function TerminalToolbar({
           ↵
         </button>
 
-        {/* Page Up / Page Down - useful for scrolling in claude, vim, less, etc. */}
+        {/* Page Up / Page Down - enters tmux copy-mode then scrolls */}
         <button
           type="button"
           onMouseDown={(e) => e.preventDefault()}
           onClick={(e) => {
             e.stopPropagation();
-            onKeyPress(SPECIAL_KEYS.PAGE_UP);
+            onKeyPress(SPECIAL_KEYS.TMUX_SCROLL_UP);
           }}
           className="bg-secondary text-secondary-foreground active:bg-primary active:text-primary-foreground flex-shrink-0 rounded-md px-2.5 py-1.5 text-xs font-medium"
         >
@@ -543,7 +546,7 @@ export function TerminalToolbar({
           onMouseDown={(e) => e.preventDefault()}
           onClick={(e) => {
             e.stopPropagation();
-            onKeyPress(SPECIAL_KEYS.PAGE_DOWN);
+            onKeyPress(SPECIAL_KEYS.TMUX_SCROLL_DOWN);
           }}
           className="bg-secondary text-secondary-foreground active:bg-primary active:text-primary-foreground flex-shrink-0 rounded-md px-2.5 py-1.5 text-xs font-medium"
         >
