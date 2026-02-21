@@ -26,6 +26,11 @@ tmux set-option status-right '#[fg=#6c7086]| #[fg=#89b4fa]#S #[fg=#6c7086]| #[fg
 tmux set-option status-right-length 40 2>/dev/null
 tmux set-option status-position bottom 2>/dev/null
 
+# Enable mouse mode so touch scroll events (sent as SGR mouse wheel sequences)
+# are handled by tmux even when a full-screen app (claude, codex, vim) is running.
+# This allows mobile touch scrolling to work through tmux's copy-mode scrollback.
+tmux set-option mouse on 2>/dev/null
+
 # Clear and show banner
 clear
 
