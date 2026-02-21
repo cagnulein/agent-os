@@ -29,6 +29,8 @@ const SPECIAL_KEYS = {
   CTRL_D: "\x04",
   CTRL_Z: "\x1a",
   CTRL_L: "\x0c",
+  PAGE_UP: "\x1b[5~",
+  PAGE_DOWN: "\x1b[6~",
 } as const;
 
 interface TerminalToolbarProps {
@@ -522,6 +524,30 @@ export function TerminalToolbar({
           className="bg-secondary text-secondary-foreground active:bg-primary active:text-primary-foreground flex-shrink-0 rounded-md px-2.5 py-1.5 text-xs font-medium"
         >
           ↵
+        </button>
+
+        {/* Page Up / Page Down - useful for scrolling in claude, vim, less, etc. */}
+        <button
+          type="button"
+          onMouseDown={(e) => e.preventDefault()}
+          onClick={(e) => {
+            e.stopPropagation();
+            onKeyPress(SPECIAL_KEYS.PAGE_UP);
+          }}
+          className="bg-secondary text-secondary-foreground active:bg-primary active:text-primary-foreground flex-shrink-0 rounded-md px-2.5 py-1.5 text-xs font-medium"
+        >
+          PgUp
+        </button>
+        <button
+          type="button"
+          onMouseDown={(e) => e.preventDefault()}
+          onClick={(e) => {
+            e.stopPropagation();
+            onKeyPress(SPECIAL_KEYS.PAGE_DOWN);
+          }}
+          className="bg-secondary text-secondary-foreground active:bg-primary active:text-primary-foreground flex-shrink-0 rounded-md px-2.5 py-1.5 text-xs font-medium"
+        >
+          PgDn
         </button>
 
         {/* Special keys */}
