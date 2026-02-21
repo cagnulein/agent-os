@@ -31,13 +31,11 @@ const SPECIAL_KEYS = {
   CTRL_L: "\x0c",
   PAGE_UP: "\x1b[5~",
   PAGE_DOWN: "\x1b[6~",
-  // Tmux copy-mode + scroll: \x02[ enters copy-mode, then the page key scrolls
-  TMUX_SCROLL_UP: "\x02[\x1b[5~",
-  TMUX_SCROLL_DOWN: "\x02[\x1b[6~",
 } as const;
 
 interface TerminalToolbarProps {
   onKeyPress: (key: string) => void;
+  onScrollPage?: (direction: 1 | -1) => void;
   onFilePicker?: () => void;
   onCopy?: () => boolean; // Returns true if selection was copied
   selectMode?: boolean;
@@ -310,6 +308,7 @@ function PasteModal({
 
 export function TerminalToolbar({
   onKeyPress,
+  onScrollPage,
   onFilePicker,
   onCopy,
   selectMode = false,
@@ -529,13 +528,13 @@ export function TerminalToolbar({
           ↵
         </button>
 
-        {/* Page Up / Page Down - enters tmux copy-mode then scrolls */}
+        {/* Page Up / Page Down - scrolls xterm.js viewport (normal buffer) or sends key (alternate buffer) */}
         <button
           type="button"
           onMouseDown={(e) => e.preventDefault()}
           onClick={(e) => {
             e.stopPropagation();
-            onKeyPress(SPECIAL_KEYS.TMUX_SCROLL_UP);
+            onScrollPage?.(-1);
           }}
           className="bg-secondary text-secondary-foreground active:bg-primary active:text-primary-foreground flex-shrink-0 rounded-md px-2.5 py-1.5 text-xs font-medium"
         >
@@ -546,7 +545,7 @@ export function TerminalToolbar({
           onMouseDown={(e) => e.preventDefault()}
           onClick={(e) => {
             e.stopPropagation();
-            onKeyPress(SPECIAL_KEYS.TMUX_SCROLL_DOWN);
+            onScrollPage?.(1);
           }}
           className="bg-secondary text-secondary-foreground active:bg-primary active:text-primary-foreground flex-shrink-0 rounded-md px-2.5 py-1.5 text-xs font-medium"
         >

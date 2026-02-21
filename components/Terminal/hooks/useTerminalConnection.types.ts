@@ -28,6 +28,7 @@ export interface UseTerminalConnectionReturn {
   xtermRef: RefObject<XTerm | null>;
   searchAddonRef: RefObject<SearchAddon | null>;
   scrollToBottom: () => void;
+  scrollPage: (direction: 1 | -1) => void;
   copySelection: () => boolean;
   sendInput: (data: string) => void;
   sendCommand: (command: string) => void;

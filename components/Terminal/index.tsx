@@ -76,6 +76,7 @@ export const Terminal = forwardRef<TerminalHandle, TerminalProps>(
       xtermRef,
       searchAddonRef,
       scrollToBottom,
+      scrollPage,
       copySelection,
       sendInput,
       sendCommand,
@@ -315,6 +316,7 @@ export const Terminal = forwardRef<TerminalHandle, TerminalProps>(
         {isMobile && (
           <TerminalToolbar
             onKeyPress={sendInput}
+            onScrollPage={scrollPage}
             onFilePicker={() => setShowFilePicker(true)}
             onCopy={copySelection}
             selectMode={selectMode}

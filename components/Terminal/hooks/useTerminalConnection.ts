@@ -61,6 +61,21 @@ export function useTerminalConnection({
     []
   );
 
+  const scrollPage = useCallback((direction: 1 | -1) => {
+    const term = xtermRef.current;
+    if (!term) return;
+    if (term.buffer.active.type === "alternate") {
+      // Alternate buffer (vim, less, etc.) – send actual Page Up/Down keys
+      const key = direction === -1 ? "\x1b[5~" : "\x1b[6~";
+      if (wsRef.current?.readyState === WebSocket.OPEN) {
+        wsRef.current.send(JSON.stringify({ type: "input", data: key }));
+      }
+    } else {
+      // Normal buffer (shell, tmux) – scroll xterm.js viewport
+      term.scrollLines(direction * term.rows);
+    }
+  }, []);
+
   const copySelection = useCallback(() => {
     const selection = xtermRef.current?.getSelection();
     if (selection) {
@@ -270,6 +285,7 @@ export function useTerminalConnection({
     xtermRef,
     searchAddonRef,
     scrollToBottom,
+    scrollPage,
     copySelection,
     sendInput,
     sendCommand,
