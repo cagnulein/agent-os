@@ -61,6 +61,30 @@ export function useTerminalConnection({
     []
   );
 
+  const scrollPage = useCallback((direction: 1 | -1) => {
+    const term = xtermRef.current;
+    if (!term) return;
+    const ws = wsRef.current;
+    if (term.buffer.active.type === "alternate") {
+      // Alternate buffer = tmux is active.
+      // Enter tmux copy-mode first (\x02[), then after a short delay send the
+      // page key so tmux is fully in copy-mode before processing the scroll.
+      if (!ws || ws.readyState !== WebSocket.OPEN) return;
+      ws.send(JSON.stringify({ type: "input", data: "\x02[" }));
+      const pageKey = direction === -1 ? "\x1b[5~" : "\x1b[6~";
+      setTimeout(() => {
+        if (ws.readyState === WebSocket.OPEN) {
+          ws.send(JSON.stringify({ type: "input", data: pageKey }));
+        }
+      }, 150);
+    } else {
+      // Normal buffer (plain shell without tmux) – scroll xterm.js viewport.
+      // scrollLines(positive) = content moves up = older lines become visible (PgUp).
+      // scrollLines(negative) = content moves down = newer lines become visible (PgDn).
+      term.scrollLines(-direction * term.rows);
+    }
+  }, []);
+
   const copySelection = useCallback(() => {
     const selection = xtermRef.current?.getSelection();
     if (selection) {
@@ -270,6 +294,7 @@ export function useTerminalConnection({
     xtermRef,
     searchAddonRef,
     scrollToBottom,
+    scrollPage,
     copySelection,
     sendInput,
     sendCommand,

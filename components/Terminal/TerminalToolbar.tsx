@@ -29,10 +29,13 @@ const SPECIAL_KEYS = {
   CTRL_D: "\x04",
   CTRL_Z: "\x1a",
   CTRL_L: "\x0c",
+  PAGE_UP: "\x1b[5~",
+  PAGE_DOWN: "\x1b[6~",
 } as const;
 
 interface TerminalToolbarProps {
   onKeyPress: (key: string) => void;
+  onScrollPage?: (direction: 1 | -1) => void;
   onFilePicker?: () => void;
   onCopy?: () => boolean; // Returns true if selection was copied
   selectMode?: boolean;
@@ -305,6 +308,7 @@ function PasteModal({
 
 export function TerminalToolbar({
   onKeyPress,
+  onScrollPage,
   onFilePicker,
   onCopy,
   selectMode = false,
@@ -522,6 +526,30 @@ export function TerminalToolbar({
           className="bg-secondary text-secondary-foreground active:bg-primary active:text-primary-foreground flex-shrink-0 rounded-md px-2.5 py-1.5 text-xs font-medium"
         >
           ↵
+        </button>
+
+        {/* Page Up / Page Down - scrolls xterm.js viewport (normal buffer) or sends key (alternate buffer) */}
+        <button
+          type="button"
+          onMouseDown={(e) => e.preventDefault()}
+          onClick={(e) => {
+            e.stopPropagation();
+            onScrollPage?.(-1);
+          }}
+          className="bg-secondary text-secondary-foreground active:bg-primary active:text-primary-foreground flex-shrink-0 rounded-md px-2.5 py-1.5 text-xs font-medium"
+        >
+          PgUp
+        </button>
+        <button
+          type="button"
+          onMouseDown={(e) => e.preventDefault()}
+          onClick={(e) => {
+            e.stopPropagation();
+            onScrollPage?.(1);
+          }}
+          className="bg-secondary text-secondary-foreground active:bg-primary active:text-primary-foreground flex-shrink-0 rounded-md px-2.5 py-1.5 text-xs font-medium"
+        >
+          PgDn
         </button>
 
         {/* Special keys */}
