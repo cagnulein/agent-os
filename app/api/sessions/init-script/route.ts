@@ -26,6 +26,9 @@ tmux set-option status-right '#[fg=#6c7086]| #[fg=#89b4fa]#S #[fg=#6c7086]| #[fg
 tmux set-option status-right-length 40 2>/dev/null
 tmux set-option status-position bottom 2>/dev/null
 
+# Enable mouse support (required for scroll buttons and touch scrolling)
+tmux set-option -g mouse on 2>/dev/null
+
 # Clear and show banner
 clear
 

@@ -64,14 +64,21 @@ export function useTerminalConnection({
   const scrollPage = useCallback((direction: 1 | -1) => {
     const term = xtermRef.current;
     if (!term) return;
+    const ws = wsRef.current;
     if (term.buffer.active.type === "alternate") {
-      // Alternate buffer (vim, less, etc.) – send actual Page Up/Down keys
-      const key = direction === -1 ? "\x1b[5~" : "\x1b[6~";
-      if (wsRef.current?.readyState === WebSocket.OPEN) {
-        wsRef.current.send(JSON.stringify({ type: "input", data: key }));
+      // Alternate buffer = tmux (or full-screen app within tmux).
+      // Send SGR mouse wheel events – tmux with `mouse on` intercepts these
+      // and scrolls its pane history automatically (same mechanism as touch gesture).
+      // Send enough events to cover a full page (tmux scrolls ~3 lines per event).
+      if (!ws || ws.readyState !== WebSocket.OPEN) return;
+      const wheelEvent =
+        direction === -1 ? "\x1b[<65;1;1M" : "\x1b[<64;1;1M";
+      const eventCount = Math.ceil(term.rows / 3);
+      for (let i = 0; i < eventCount; i++) {
+        ws.send(JSON.stringify({ type: "input", data: wheelEvent }));
       }
     } else {
-      // Normal buffer (shell, tmux) – scroll xterm.js viewport
+      // Normal buffer (plain shell without tmux) – scroll xterm.js viewport
       term.scrollLines(direction * term.rows);
     }
   }, []);
