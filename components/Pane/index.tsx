@@ -206,6 +206,8 @@ export const Pane = memo(function Pane({
         : tab.attachedTmux;
 
       if (tmuxName) {
+        // Enable mouse support before attaching so scroll events work
+        handle.sendCommand("tmux set-option -g mouse on 2>/dev/null");
         setTimeout(() => handle.sendCommand(`tmux attach -t ${tmuxName}`), 100);
       }
     },
